@@ -248,7 +248,7 @@ function App() {
                 id="Word"
                 data-selected={currentWords.includes(id)}
                 data-ctrl={ctrlPressed}
-                // data-notCLicable={!currentWords.includes(id) && !idsWord.includes(id)}
+                data-notCLicable={!currentWords.includes(id) && !idsWord.includes(id)}
               >
                 {w}
               </div>
