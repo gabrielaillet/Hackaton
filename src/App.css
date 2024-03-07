@@ -34,12 +34,10 @@
 }
 .diva {
   width: 40%;
-  height: 80%;
   overflow: hidden;
   }
   
   .divb {
-    height: 80%;
     overflow: hidden;
   width: 60%;
   }
@@ -141,3 +139,7 @@
 .Button:hover{
   border-color: #50a0e181;
 }
+
+
+
+

@@ -1,11 +1,12 @@
 import "./App.css";
-import SplitPane from "react-split-pane";
 import { useEffect, useState } from "react";
 import { getChunks } from "./function";
 import { creatJsonOutputData } from "./function";
 import help from "./assets/Align_Help.png";
 import logo from "./assets/circle-info-solid.svg";
 import close from "./assets/x-solid.svg";
+
+
 const plse = require("./assets/TIT_align_juxta_psle.json");
 const jxt = require("./assets/Titus_ChatGPT_English_JUXTA.json");
 
@@ -121,7 +122,7 @@ function App() {
     };
   }, []);
   return (
-    <div style={{ margin: 20,height:'100vh' }}>
+    <div style={{ height: "100vh", overflow: "hidden" }}>
       <div
         style={{
           flexDirection: "row",
@@ -133,8 +134,10 @@ function App() {
         <div
           className="Button"
           onClick={() => {
-            modifyPLSE();
-            setCurrentBlockId((prev) => prev - 1);
+            if (currentBlockid != 0) {
+              modifyPLSE();
+              setCurrentBlockId((prev) => prev - 1);
+            }
           }}
         >
           block precedent
@@ -146,15 +149,17 @@ function App() {
         <div
           className="Button"
           onClick={() => {
-            modifyPLSE();
-            setCurrentBlockId((prev) => prev + 1);
+            if (currentBlockid != plse.blocks.length - 1) {
+              modifyPLSE();
+              setCurrentBlockId((prev) => prev + 1);
+            }
           }}
         >
           block suivant
         </div>
       </div>
-      <div style={{ flexDirection: "row", display: "flex",height:'100%' }}>
-    <div className="diva" style={{ overflowY: 'scroll', flex: 1 }}>
+      <div style={{ flexDirection: "row", display: "flex", height: "90%" }}>
+        <div className="diva" style={{ overflowY: "scroll", flex: 1,resize:'horizontal' }}>
           {blocksSentenceId.map((ids) =>
             jxt.sentences[ids].chunks.map((c) => (
               <div
@@ -209,7 +214,11 @@ function App() {
             ))
           )}
         </div>
-        <div className="divb" id="wrapper" style={{ overflowY: 'scroll', flex: 1 }}>
+        <div
+          className="divb"
+          id="wrapper"
+          style={{ overflowY: "scroll", flex: 1 }}
+        >
           <div style={{ display: "flex", flexWrap: "wrap", margin: 15 }}>
             {plse.blocks[currentBlockid].tradText.split(" ").map((w, id) => (
               <p
@@ -251,24 +260,22 @@ function App() {
                 }}
                 onMouseOver={() => {
                   if (elemSelected != "none") {
+                    let p = [...currentWords];
+                    let t = [...idsWord];
                     for (let wid = 0; wid < currentWords.length; wid++) {
                       if (
                         elemSelected[1].indexOf(currentWords[wid]) < 0 &&
                         (currentWords[wid] < elemSelected[0] ||
                           currentWords[wid] > id)
                       ) {
-                        setIdsWord((prev) => {
-                          let prev2 = [...prev];
-                          prev2.push(currentWords[wid]);
-                          return prev2;
-                        });
-                        setCurrentWords((prev) => {
-                          let prevIdsWord = [...prev];
-                          prevIdsWord.splice(wid, 1);
-                          return prevIdsWord;
-                        });
+                        t.push(currentWords[wid]);
+
+                        p.splice(p.indexOf(currentWords[wid]), 1);
                       }
                     }
+                    setIdsWord(t);
+                    setCurrentWords(p);
+
                     for (let i = elemSelected[0]; i <= id; i++) {
                       if (idsWord.includes(i)) {
                         if (!currentWords.includes(i)) {
@@ -310,42 +317,45 @@ function App() {
       <div style={{ position: "fixed", bottom: 60, right: 60 }}>
         {open ? (
           <>
-          <div
-            style={{
-              flexDirection: "column",
-              justifyContent: "flex-end", 
-              display: "flex",
-              background: "#ebebeb",
-              borderRadius:10,
-            }}
-          >
+            <div
+              style={{
+                flexDirection: "column",
+                justifyContent: "flex-end",
+                display: "flex",
+                background: "#ebebeb",
+                borderRadius: 10,
+              }}
+            >
+              <img
+                style={{
+                  alignSelf: "flex-end",
+                  marginTop: 16,
+                  marginRight: 16,
+                }}
+                onClick={() => setOpen(false)}
+                src={close}
+                width="24"
+                height="24"
+                alt="logo"
+              />
+              <img src={help} height={307} width={581} />
+            </div>
             <img
-              style={{ alignSelf: "flex-end",marginTop:16,marginRight:16}}
               onClick={() => setOpen(false)}
-              src={close}
-              width="24"
-              height="24"
-              alt="logo"
+              src={logo}
+              width="40"
+              height="40"
+              style={{ position: "fixed", bottom: 35, right: 35 }}
             />
-            <img src={help} height={307} width={581}/>
-           
-          </div>
-           <img
-           onClick={() => setOpen(false)}
-           src={logo}
-           width="40"
-           height="40"
-y           style={{position: "fixed", bottom: 35, right: 35 }}
-         /></>
+          </>
         ) : (
           <img
             onClick={() => setOpen(true)}
             src={logo}
-            style={{position: "fixed", bottom: 35, right: 35}}
+            style={{ position: "fixed", bottom: 35, right: 35 }}
             width="40"
             height="40"
             alt="logo"
-            
           />
         )}
       </div>
