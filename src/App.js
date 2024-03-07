@@ -3,14 +3,19 @@ import SplitPane from "react-split-pane";
 import { useEffect, useState } from "react";
 import { getChunks } from "./function";
 import { creatJsonOutputData } from "./function";
+import help from "./assets/Align_Help.png";
+import logo from "./assets/circle-info-solid.svg";
+import close from "./assets/x-solid.svg";
 const plse = require("./assets/plse.json");
 const jxt = require("./assets/jxtl.json");
 
 function App() {
+  const [open, setOpen] = useState(true);
   const [ctrlPressed, setCtrlPressed] = useState(false);
   const [currentChuncksId, setCurrentChuncksId] = useState(
     jxt.sentences[0].chunks[0].checksum
   );
+  const [elemSelected, setElemSelected] = useState("none");
   const [currentBlockid, setCurrentBlockId] = useState(0);
   const [blocksSentenceId, setBlockSentenceId] = useState(
     plse.blocks[0].sentences
@@ -22,6 +27,7 @@ function App() {
   const [currentWords, setCurrentWords] = useState([]);
   const [idsWord, setIdsWord] = useState([]);
 
+  const [hoverNotSelectedWord, setHoverNotSelectedWord] = useState([]);
   const modifyPLSE = () => {
     if (plse.blocks[currentBlockid].alignments.length > 0) {
       for (let i = 0; i < plse.blocks[currentBlockid].alignments.length; i++) {
@@ -66,10 +72,7 @@ function App() {
     setCurrentWords([]);
   }, [currentChuncksId]);
 
-
-
   useEffect(() => {
-    
     let tabl = [];
     for (
       let i = 0;
@@ -84,8 +87,10 @@ function App() {
       });
     }
     setIdsWord(tabl);
-    setBlockSentenceId(plse.blocks[currentBlockid].sentences)
-    setCurrentChuncksId(jxt.sentences[plse.blocks[currentBlockid].sentences[0]].chunks[0].checksum)
+    setBlockSentenceId(plse.blocks[currentBlockid].sentences);
+    setCurrentChuncksId(
+      jxt.sentences[plse.blocks[currentBlockid].sentences[0]].chunks[0].checksum
+    );
   }, [currentBlockid]);
 
   const myFunctionTrue = () => {
@@ -115,44 +120,38 @@ function App() {
       document.removeEventListener("keydown", keyDownHandler);
     };
   }, []);
-
   return (
-    <div>
-      <p>chunks selected : {currentChuncksId}</p>
-      <p>sentence selected: {currentSetenceId}</p>
+    <div style={{ margin: 20 }}>
       <div
-        onClick={() => {
-          modifyPLSE();
-          setCurrentBlockId((prev) => prev + 1);
+        style={{
+          flexDirection: "row",
+          display: "flex",
+          justifyContent: "space-between",
+          margin: 20,
         }}
       >
-        chunck suivant {currentBlockid}/{plse.blocks.length - 1}
-      </div>
-      <div
-        onClick={() => {
-          modifyPLSE();
-          setCurrentBlockId((prev) => prev - 1);
-        }}
-      >
-        chunck precedent {currentBlockid}/{plse.blocks.length - 1}
-      </div>
-      <div onClick={() => setcurrentSentenceId((prev) => prev + 1)}>
-        phrase suivant {currentSetenceId}/{jxt.sentences.length - 1}
-      </div>
+        <div
+          className="Button"
+          onClick={() => {
+            modifyPLSE();
+            setCurrentBlockId((prev) => prev - 1);
+          }}
+        >
+          block precedent
+        </div>
+        <div style={{ fontSize: "2em" }}>
+          {currentBlockid + 1}/{plse.blocks.length}
+        </div>
 
-      <div style={{ display: "flex" }}>
-        words id selected [
-        {currentWords.map((i) => (
-          <div> {i},</div>
-        ))}
-        ]
-      </div>
-      <div style={{ display: "flex" }}>
-        all words id [
-        {idsWord.map((i) => (
-          <div> {i},</div>
-        ))}
-        ]
+        <div
+          className="Button"
+          onClick={() => {
+            modifyPLSE();
+            setCurrentBlockId((prev) => prev + 1);
+          }}
+        >
+          block suivant
+        </div>
       </div>
       <div style={{ flexDirection: "row", display: "flex" }}>
         <div className="diva">
@@ -160,17 +159,49 @@ function App() {
             jxt.sentences[ids].chunks.map((c) => (
               <div
                 className="sentencesWrapper"
+                onMouseEnter={() => {
+                  if (c.checksum != currentChuncksId) {
+                    for (
+                      let i = 0;
+                      i < plse.blocks[currentBlockid].alignments.length;
+                      i++
+                    ) {
+                      if (
+                        c.checksum ===
+                        plse.blocks[currentBlockid].alignments[i].md5Chunck
+                      ) {
+                        console.log(
+                          plse.blocks[currentBlockid].alignments[i].words
+                        );
+
+                        setHoverNotSelectedWord(
+                          plse.blocks[currentBlockid].alignments[i].words
+                        );
+                      }
+                    }
+                  }
+                }}
+                onMouseLeave={() => {
+                  setHoverNotSelectedWord([]);
+                }}
+                data-hasBeenDone={JSON.stringify(
+                  plse.blocks[currentBlockid].alignments
+                    .map(
+                      (a) => a.md5Chunck === c.checksum && a.words.length > 0
+                    )
+                    .indexOf(true) >= 0
+                )}
                 data-isSelected={currentChuncksId === c.checksum}
+                onClick={() => {
+                  modifyPLSE();
+                  setcurrentSentenceId(ids);
+                  setCurrentChuncksId(c.checksum);
+                }}
               >
                 <div
                   id={c.checksum}
                   data-isSelected={currentChuncksId === c.checksum}
                   className="sentences"
-                  onClick={() => {
-                    modifyPLSE();
-                    setcurrentSentenceId(ids);
-                    setCurrentChuncksId(c.checksum);
-                  }}
                 >
                   {c.gloss}
                 </div>
@@ -181,7 +212,7 @@ function App() {
         <div className="divb" id="wrapper">
           <div style={{ display: "flex", flexWrap: "wrap", margin: 15 }}>
             {plse.blocks[currentBlockid].tradText.split(" ").map((w, id) => (
-              <div
+              <p
                 onClick={() => {
                   if (idsWord.includes(id)) {
                     if (!currentWords.includes(id)) {
@@ -212,49 +243,111 @@ function App() {
                     }
                   }
                 }}
+                onMouseDown={() => {
+                  setElemSelected([id, [...currentWords]]);
+                }}
+                onMouseUp={() => {
+                  setElemSelected("none");
+                }}
                 onMouseOver={() => {
-                  if (ctrlPressed) {
-                    if (idsWord.includes(id)) {
-                      if (!currentWords.includes(id)) {
-                        setCurrentWords((prev) => {
-                          let prev2 = [...prev];
-                          prev2.push(id);
-                          return prev2;
-                        });
-                        setIdsWord((prev) => {
-                          let prevIdsWord = [...prev];
-                          prevIdsWord.splice(prevIdsWord.indexOf(id), 1);
-                          return prevIdsWord;
-                        });
-                      } else {
-                      }
-                    } else {
-                      if (currentWords.includes(id)) {
+                  if (elemSelected != "none") {
+                    for (let wid = 0; wid < currentWords.length; wid++) {
+                      if (
+                        elemSelected[1].indexOf(currentWords[wid]) < 0 &&
+                        (currentWords[wid] < elemSelected[0] ||
+                          currentWords[wid] > id)
+                      ) {
                         setIdsWord((prev) => {
                           let prev2 = [...prev];
-                          prev2.push(id);
+                          prev2.push(currentWords[wid]);
                           return prev2;
                         });
                         setCurrentWords((prev) => {
                           let prevIdsWord = [...prev];
-                          prevIdsWord.splice(prevIdsWord.indexOf(id), 1);
+                          prevIdsWord.splice(wid, 1);
                           return prevIdsWord;
                         });
                       }
                     }
+                    for (let i = elemSelected[0]; i <= id; i++) {
+                      if (idsWord.includes(i)) {
+                        if (!currentWords.includes(i)) {
+                          setCurrentWords((prev) => {
+                            let prev2 = [...prev];
+                            prev2.push(i);
+                            return prev2;
+                          });
+                          setIdsWord((prev) => {
+                            let prevIdsWord = [...prev];
+                            prevIdsWord.splice(prevIdsWord.indexOf(i), 1);
+                            return prevIdsWord;
+                          });
+                        } else {
+                        }
+                      }
+                    }
                   }
                 }}
+                // onMouseOver={() => {
+                //   console.log(ctrlPressed)
+                //   if (ctrlPressed) {
+                //
                 className="Word"
                 id="Word"
                 data-selected={currentWords.includes(id)}
                 data-ctrl={ctrlPressed}
-                data-notCLicable={!currentWords.includes(id) && !idsWord.includes(id)}
+                data-notSelectedBuHover={hoverNotSelectedWord.includes(id)}
+                data-notCLicable={
+                  !currentWords.includes(id) && !idsWord.includes(id)
+                }
               >
                 {w}
-              </div>
+              </p>
             ))}
           </div>
         </div>
+      </div>
+      <div style={{ position: "fixed", bottom: 60, right: 60 }}>
+        {open ? (
+          <>
+          <div
+            style={{
+              flexDirection: "column",
+              justifyContent: "flex-end", 
+              display: "flex",
+              background: "#ebebeb",
+              borderRadius:10,
+            }}
+          >
+            <img
+              style={{ alignSelf: "flex-end",marginTop:16,marginRight:16}}
+              onClick={() => setOpen(false)}
+              src={close}
+              width="24"
+              height="24"
+              alt="logo"
+            />
+            <img src={help} height={307} width={581}/>
+           
+          </div>
+           <img
+           onClick={() => setOpen(false)}
+           src={logo}
+           width="40"
+           height="40"
+y           style={{position: "fixed", bottom: 35, right: 35 }}
+         /></>
+        ) : (
+          <img
+            onClick={() => setOpen(true)}
+            src={logo}
+            style={{position: "fixed", bottom: 35, right: 35}}
+            width="40"
+            height="40"
+            alt="logo"
+            
+          />
+        )}
       </div>
     </div>
   );

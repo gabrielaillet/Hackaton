@@ -64,7 +64,8 @@
   padding-right: 16px;
   padding-top: 8px;
   padding-bottom: 8px;
-  
+  font-size: 2em;
+
 }
 
 
@@ -73,6 +74,10 @@
   border-radius: 4px;
   width: "fit-content";
 
+
+}
+.sentencesWrapper[data-hasBeenDone = "true"]{
+  background-color: #b9f3bd;
 }
 .sentencesWrapper[data-isSelected = "true"]{
   background-color: var(--primary)
@@ -93,28 +98,50 @@
 
 .Word {
   border-radius: 4px;
-
   padding: 5px; /* Added 'px' unit */
   margin: 1px; /* Added 'px' unit */
-  
+  font-size: 2em;
 
+}
+.Word::selection{
+  background: rgba(255, 255, 0, 0);
 }
 .Word[data-selected="false"]:hover{
   background-color: var(--pimaryFade)
-
 }
-
-.Word[data-selected="true"]{
-  background-color: var(--primary)
-
+.Word[data-selected="false"][data-notCLicable ="true"]:hover{
+  background-color: rgba(176, 176, 176, 0.5);
 }
 
 .Word[data-ctrl="true"]:hover {
   background-color: var(--primary)
 }
 
-.Word[data-notCLicable ="true"]{
-  opacity: 0.5;
-  background-color: red;
+.Word[data-notCLicable ="true"][data-notSelectedBuHover = "true"]{
+  background-color: #e2f2ff}
 
+.Word[data-selected="true"]{
+  background-color: var(--primary)
+
+}
+
+
+.Word[data-notCLicable ="true"]{
+  background-color: rgba(176, 176, 176, 0.5);
+}
+
+.Button{
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  border-radius:4px;
+  width: fit-content;
+  border-width: 1;
+  border-style: solid;
+  font-size: 2em;
+
+}
+.Button:hover{
+  border-color: #50a0e181;
 }
