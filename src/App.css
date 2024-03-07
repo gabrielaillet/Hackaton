@@ -33,18 +33,14 @@
   color: #61dafb;
 }
 .diva {
-  height:30%;
-  min-height:30%;
-  overflow-x: hidden;
-  overflow-y: auto;
   width: 40%;
+  height: 80%;
+  overflow: hidden;
   }
   
   .divb {
-  height:30%;
-  min-height:30%;
-  overflow-x: hidden;
-  overflow-y: auto;
+    height: 80%;
+    overflow: hidden;
   width: 60%;
   }
 @keyframes App-logo-spin {

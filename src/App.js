@@ -6,8 +6,8 @@ import { creatJsonOutputData } from "./function";
 import help from "./assets/Align_Help.png";
 import logo from "./assets/circle-info-solid.svg";
 import close from "./assets/x-solid.svg";
-const plse = require("./assets/plse.json");
-const jxt = require("./assets/jxtl.json");
+const plse = require("./assets/TIT_align_juxta_psle.json");
+const jxt = require("./assets/Titus_ChatGPT_English_JUXTA.json");
 
 function App() {
   const [open, setOpen] = useState(true);
@@ -121,7 +121,7 @@ function App() {
     };
   }, []);
   return (
-    <div style={{ margin: 20 }}>
+    <div style={{ margin: 20,height:'100vh' }}>
       <div
         style={{
           flexDirection: "row",
@@ -153,8 +153,8 @@ function App() {
           block suivant
         </div>
       </div>
-      <div style={{ flexDirection: "row", display: "flex" }}>
-        <div className="diva">
+      <div style={{ flexDirection: "row", display: "flex",height:'100%' }}>
+    <div className="diva" style={{ overflowY: 'scroll', flex: 1 }}>
           {blocksSentenceId.map((ids) =>
             jxt.sentences[ids].chunks.map((c) => (
               <div
@@ -209,7 +209,7 @@ function App() {
             ))
           )}
         </div>
-        <div className="divb" id="wrapper">
+        <div className="divb" id="wrapper" style={{ overflowY: 'scroll', flex: 1 }}>
           <div style={{ display: "flex", flexWrap: "wrap", margin: 15 }}>
             {plse.blocks[currentBlockid].tradText.split(" ").map((w, id) => (
               <p
