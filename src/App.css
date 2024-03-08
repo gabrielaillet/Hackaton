@@ -2,6 +2,15 @@
   text-align: center;
   
 }
+@font-face {
+  font-family: 'CharisSIL';
+  src: url('./fonts/CharisSIL-Bold.ttf') format('ttf'),
+       url('./fonts/CharisSIL-BoldItalic.ttf') format('tff'),
+       url('./fonts/CharisSIL-Italic.ttf') format('tff'),
+       url('./fonts/CharisSIL-Regular.ttf') format('tff');
+  /* Add other font properties if needed */
+}
+
 :root{
   --primary: rgba(255, 127, 92, 0.8);
   --pimaryFade: rgba(255, 127, 92, 0.44);
@@ -35,6 +44,7 @@
 .diva {
   width: 40%;
   overflow: hidden;
+  z-index: 0;
   }
   
   .divb {
@@ -58,13 +68,13 @@
   padding-right: 16px;
   padding-top: 8px;
   padding-bottom: 8px;
-  font-size: 2em;
+  font-size: var(--zoomLeft);
+  font-family: "CharisSIL";
 
 }
 
 
 .sentences[data-isSelected = "true"]{
-  
   border-radius: 4px;
   width: "fit-content";
 
@@ -86,6 +96,7 @@
   padding-bottom: 4px;
   border-radius:4px;
   width: fit-content;
+  z-index: 1;
 
   
 }
@@ -94,7 +105,7 @@
   border-radius: 4px;
   padding: 5px; /* Added 'px' unit */
   margin: 1px; /* Added 'px' unit */
-  font-size: 2em;
+  font-family: "CharisSIL";
 
 }
 .Word::selection{
@@ -122,6 +133,7 @@
 
 .Word[data-notCLicable ="true"]{
   background-color: rgba(176, 176, 176, 0.5);
+
 }
 
 .Button{
@@ -140,6 +152,30 @@
   border-color: #50a0e181;
 }
 
+.image {
+  transition: opacity 0.3s ease-in-out; /* Use opacity for smoother transitions */
+  opacity: 1; /* Initially visible */
+}
 
+.imageWrapper {
+  width: 1290px;
+  transition: width 0.3s ease-in-out; /* Adjust transition properties */
+  overflow: hidden; /* Ensure the overflow is hidden */
+}
+
+.imageWrapper[data-isClosed='false'] {
+  width: 0;
+  overflow: hidden; /* Hide the overflow when closed */
+}
+
+.image[data-isClosed='false'] {
+  opacity: 0; /* Hide the image when closed */
+}
+
+.image2{
+  align-self: "flex-end";
+  margin-top: 16;
+  margin-right: 16;
+}
 
 

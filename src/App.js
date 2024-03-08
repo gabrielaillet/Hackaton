@@ -5,17 +5,20 @@ import { creatJsonOutputData } from "./function";
 import help from "./assets/Align_Help.png";
 import logo from "./assets/circle-info-solid.svg";
 import close from "./assets/x-solid.svg";
-
-
+import { lexingRegexes } from "proskomma-core";
+import XRegExp from "xregexp";
 const plse = require("./assets/TIT_align_juxta_psle.json");
 const jxt = require("./assets/Titus_ChatGPT_English_JUXTA.json");
 
 function App() {
+  const mainRegex = XRegExp.union(lexingRegexes.map((x) => x[2]));
+  console.log(plse)
   const [open, setOpen] = useState(true);
+  const [zoomLeft, setZoomLeft] = useState(24);
+  const [zoomRigth, setZoomRigth] = useState(24);
+  const [left, setLeft] = useState("none");
   const [ctrlPressed, setCtrlPressed] = useState(false);
-  const [currentChuncksId, setCurrentChuncksId] = useState(
-    jxt.sentences[0].chunks[0].checksum
-  );
+  const [currentChuncksId, setCurrentChuncksId] = useState("none");
   const [elemSelected, setElemSelected] = useState("none");
   const [currentBlockid, setCurrentBlockId] = useState(0);
   const [blocksSentenceId, setBlockSentenceId] = useState(
@@ -94,24 +97,53 @@ function App() {
     );
   }, [currentBlockid]);
 
-  const myFunctionTrue = () => {
-    setCtrlPressed(true);
+  const myFunctionPlusTrue = () => {
+    if (left) {
+      setZoomLeft((prev) => prev + 2);
+      console.log(zoomLeft);
+    }
+    if (!left) {
+      setZoomRigth((prev) => prev + 2);
+      console.log(zoomLeft);
+    }
   };
-  const myFunctionFalse = () => {
+  const myFunctionMinusFalse = () => {
+    if (left) {
+      setZoomLeft((prev) => prev - 2);
+      console.log(zoomLeft);
+    }
+    if (!left) {
+      setZoomRigth((prev) => prev - 2);
+      console.log(zoomLeft);
+    }
+  };
+  const myFunctionControlFalse = () => {
     setCtrlPressed(false);
+  };
+  const myFunctionControlTrue = () => {
+    setCtrlPressed(true);
   };
 
   useEffect(() => {
     const keyDownHandler = (event) => {
       if (event.key === "Control") {
         event.preventDefault();
-        myFunctionTrue();
+        myFunctionControlTrue();
+      }
+      if (ctrlPressed && event.key === ";") {
+        event.preventDefault();
+        myFunctionPlusTrue();
+      }
+      if (ctrlPressed && event.key === "'") {
+        event.preventDefault();
+
+        myFunctionMinusFalse();
       }
     };
     const keyUphandler = (event) => {
       if (event.key === "Control") {
         event.preventDefault();
-        myFunctionFalse();
+        myFunctionControlFalse();
       }
     };
     document.addEventListener("keydown", keyDownHandler);
@@ -120,7 +152,7 @@ function App() {
     return () => {
       document.removeEventListener("keydown", keyDownHandler);
     };
-  }, []);
+  }, [ctrlPressed, zoomLeft, left]);
   return (
     <div style={{ height: "100vh", overflow: "hidden" }}>
       <div
@@ -158,8 +190,25 @@ function App() {
           block suivant
         </div>
       </div>
-      <div style={{ flexDirection: "row", display: "flex", height: "90%" }}>
-        <div className="diva" style={{ overflowY: "scroll", flex: 1,resize:'horizontal' }}>
+      <div
+        style={{
+          flexDirection: "row",
+          display: "flex",
+          height: "90%",
+          zIndex: 0,
+        }}
+      >
+        <div
+          className="diva"
+          onMouseOver={() => {
+            setLeft(true);
+          }}
+          onClick={() => {
+            modifyPLSE();
+            setCurrentChuncksId("none");
+          }}
+          style={{ overflowY: "scroll", flex: 1, resize: "horizontal" }}
+        >
           {blocksSentenceId.map((ids) =>
             jxt.sentences[ids].chunks.map((c) => (
               <div
@@ -197,16 +246,19 @@ function App() {
                     .indexOf(true) >= 0
                 )}
                 data-isSelected={currentChuncksId === c.checksum}
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   modifyPLSE();
                   setcurrentSentenceId(ids);
                   setCurrentChuncksId(c.checksum);
                 }}
               >
                 <div
+                  fontSize={zoomLeft}
                   id={c.checksum}
                   data-isSelected={currentChuncksId === c.checksum}
                   className="sentences"
+                  style={{ fontSize: zoomLeft }}
                 >
                   {c.gloss}
                 </div>
@@ -217,149 +269,172 @@ function App() {
         <div
           className="divb"
           id="wrapper"
+          onClick={() => {
+            modifyPLSE();
+          }}
+          onMouseOver={() => {
+            setLeft(false);
+          }}
           style={{ overflowY: "scroll", flex: 1 }}
         >
           <div style={{ display: "flex", flexWrap: "wrap", margin: 15 }}>
-            {plse.blocks[currentBlockid].tradText.split(" ").map((w, id) => (
-              <p
-                onClick={() => {
-                  if (idsWord.includes(id)) {
-                    if (!currentWords.includes(id)) {
-                      setCurrentWords((prev) => {
-                        let prev2 = [...prev];
-                        prev2.push(id);
-                        return prev2;
-                      });
-                      setIdsWord((prev) => {
-                        let prevIdsWord = [...prev];
-                        prevIdsWord.splice(prevIdsWord.indexOf(id), 1);
-                        return prevIdsWord;
-                      });
-                    } else {
-                    }
-                  } else {
-                    if (currentWords.includes(id)) {
-                      setIdsWord((prev) => {
-                        let prev2 = [...prev];
-                        prev2.push(id);
-                        return prev2;
-                      });
-                      setCurrentWords((prev) => {
-                        let prevIdsWord = [...prev];
-                        prevIdsWord.splice(prevIdsWord.indexOf(id), 1);
-                        return prevIdsWord;
-                      });
-                    }
-                  }
-                }}
-                onMouseDown={() => {
-                  setElemSelected([id, [...currentWords]]);
-                }}
-                onMouseUp={() => {
-                  setElemSelected("none");
-                }}
-                onMouseOver={() => {
-                  if (elemSelected != "none") {
-                    let p = [...currentWords];
-                    let t = [...idsWord];
-                    for (let wid = 0; wid < currentWords.length; wid++) {
-                      if (
-                        elemSelected[1].indexOf(currentWords[wid]) < 0 &&
-                        (currentWords[wid] < elemSelected[0] ||
-                          currentWords[wid] > id)
-                      ) {
-                        t.push(currentWords[wid]);
-
-                        p.splice(p.indexOf(currentWords[wid]), 1);
-                      }
-                    }
-                    setIdsWord(t);
-                    setCurrentWords(p);
-
-                    for (let i = elemSelected[0]; i <= id; i++) {
-                      if (idsWord.includes(i)) {
-                        if (!currentWords.includes(i)) {
+            {XRegExp.match(
+              plse.blocks[currentBlockid].tradText,
+              mainRegex,
+              "all"
+            )
+              .filter((v) =>
+                XRegExp(
+                  "([\\p{Letter}\\p{Number}\\p{Mark}\\u2060]{1,127})"
+                ).test(v)
+              )
+              .map((w, id) => (
+                <div
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (currentChuncksId != "none") {
+                      if (idsWord.includes(id)) {
+                        if (!currentWords.includes(id)) {
                           setCurrentWords((prev) => {
                             let prev2 = [...prev];
-                            prev2.push(i);
+                            prev2.push(id);
                             return prev2;
                           });
                           setIdsWord((prev) => {
                             let prevIdsWord = [...prev];
-                            prevIdsWord.splice(prevIdsWord.indexOf(i), 1);
+                            prevIdsWord.splice(prevIdsWord.indexOf(id), 1);
                             return prevIdsWord;
                           });
                         } else {
                         }
+                      } else {
+                        if (currentWords.includes(id)) {
+                          setIdsWord((prev) => {
+                            let prev2 = [...prev];
+                            prev2.push(id);
+                            return prev2;
+                          });
+                          setCurrentWords((prev) => {
+                            let prevIdsWord = [...prev];
+                            prevIdsWord.splice(prevIdsWord.indexOf(id), 1);
+                            return prevIdsWord;
+                          });
+                        }
                       }
                     }
+                  }}
+                  onMouseDown={(e) => {
+                    e.stopPropagation();
+                    if (currentChuncksId != "none") {
+                      setElemSelected([id, [...currentWords]]);
+                    }
+                  }}
+                  onMouseUp={(e) => {
+                    e.stopPropagation();
+                    if (currentChuncksId != "none") {
+                      setElemSelected("none");
+                    }
+                  }}
+                  onMouseOver={(e) => {
+                    e.stopPropagation();
+                    if (currentChuncksId != "none") {
+                      if (elemSelected != "none") {
+                        let p = [...currentWords];
+                        let t = [...idsWord];
+                        for (let wid = 0; wid < currentWords.length; wid++) {
+                          if (
+                            elemSelected[1].indexOf(currentWords[wid]) < 0 &&
+                            (currentWords[wid] < elemSelected[0] ||
+                              currentWords[wid] > id)
+                          ) {
+                            t.push(currentWords[wid]);
+
+                            p.splice(p.indexOf(currentWords[wid]), 1);
+                          }
+                        }
+                        setIdsWord(t);
+                        setCurrentWords(p);
+
+                        for (let i = elemSelected[0]; i <= id; i++) {
+                          if (idsWord.includes(i)) {
+                            if (!currentWords.includes(i)) {
+                              setCurrentWords((prev) => {
+                                let prev2 = [...prev];
+                                prev2.push(i);
+                                return prev2;
+                              });
+                              setIdsWord((prev) => {
+                                let prevIdsWord = [...prev];
+                                prevIdsWord.splice(prevIdsWord.indexOf(i), 1);
+                                return prevIdsWord;
+                              });
+                            } else {
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }}
+                  // onMouseOver={() => {
+                  //   console.log(ctrlPressed)
+                  //   if (ctrlPressed) {
+                  //
+                  className="Word"
+                  id="Word"
+                  style={{ fontSize: zoomRigth }}
+                  data-selected={currentWords.includes(id)}
+                  data-ctrl={ctrlPressed}
+                  data-notSelectedBuHover={hoverNotSelectedWord.includes(id)}
+                  data-notCLicable={
+                    !currentWords.includes(id) && !idsWord.includes(id)
                   }
-                }}
-                // onMouseOver={() => {
-                //   console.log(ctrlPressed)
-                //   if (ctrlPressed) {
-                //
-                className="Word"
-                id="Word"
-                data-selected={currentWords.includes(id)}
-                data-ctrl={ctrlPressed}
-                data-notSelectedBuHover={hoverNotSelectedWord.includes(id)}
-                data-notCLicable={
-                  !currentWords.includes(id) && !idsWord.includes(id)
-                }
-              >
-                {w}
-              </p>
-            ))}
+                >
+                  {w}
+                </div>
+              ))}
           </div>
         </div>
       </div>
-      <div style={{ position: "fixed", bottom: 60, right: 60 }}>
-        {open ? (
-          <>
-            <div
-              style={{
-                flexDirection: "column",
-                justifyContent: "flex-end",
-                display: "flex",
-                background: "#ebebeb",
-                borderRadius: 10,
-              }}
-            >
-              <img
+        <div style={{ position: "fixed", bottom: 60, right: 60 }}>
+          <div data-isClosed={open} className="imageWrapper">
+            <div className="image" data-isClosed={open}>
+              <div
                 style={{
-                  alignSelf: "flex-end",
-                  marginTop: 16,
-                  marginRight: 16,
+                  flexDirection: "column",
+                  justifyContent: "flex-end",
+                  display: "flex",
+                  background: "#ebebeb",
+                  borderRadius: 10,
                 }}
-                onClick={() => setOpen(false)}
-                src={close}
-                width="24"
-                height="24"
-                alt="logo"
-              />
-              <img src={help} height={307} width={581} />
+              >
+                <img
+                  style={{
+                    alignSelf: "flex-end",
+                    marginTop: 16,
+                    marginRight: 16,
+                  }}
+                  onClick={() => {
+                    console.log("nothing!");
+                    setOpen(false);
+                  }}
+                  src={close}
+                  width="24"
+                  height="24"
+                  alt="logo"
+                />
+                <img src={help} width={1290} height={450} />
+              </div>
             </div>
             <img
-              onClick={() => setOpen(false)}
+              onClick={() => setOpen((prev) => !prev)}
               src={logo}
               width="40"
               height="40"
               style={{ position: "fixed", bottom: 35, right: 35 }}
             />
-          </>
-        ) : (
-          <img
-            onClick={() => setOpen(true)}
-            src={logo}
-            style={{ position: "fixed", bottom: 35, right: 35 }}
-            width="40"
-            height="40"
-            alt="logo"
-          />
-        )}
+          </div>
+        </div>
       </div>
-    </div>
   );
 }
 
