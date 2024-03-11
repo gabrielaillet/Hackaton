@@ -12,7 +12,7 @@ const jxt = require("./assets/Titus_ChatGPT_English_JUXTA.json");
 
 function App() {
   const mainRegex = XRegExp.union(lexingRegexes.map((x) => x[2]));
-  console.log(plse)
+  console.log(plse);
   const [open, setOpen] = useState(true);
   const [zoomLeft, setZoomLeft] = useState(24);
   const [zoomRigth, setZoomRigth] = useState(24);
@@ -283,158 +283,170 @@ function App() {
               mainRegex,
               "all"
             )
-              .filter((v) =>
-                XRegExp(
-                  "([\\p{Letter}\\p{Number}\\p{Mark}\\u2060]{1,127})"
-                ).test(v)
-              )
-              .map((w, id) => (
-                <div
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (currentChuncksId != "none") {
-                      if (idsWord.includes(id)) {
-                        if (!currentWords.includes(id)) {
-                          setCurrentWords((prev) => {
-                            let prev2 = [...prev];
-                            prev2.push(id);
-                            return prev2;
-                          });
-                          setIdsWord((prev) => {
-                            let prevIdsWord = [...prev];
-                            prevIdsWord.splice(prevIdsWord.indexOf(id), 1);
-                            return prevIdsWord;
-                          });
+              .map((w) => {
+                if (
+                  XRegExp(
+                    "([\\p{Letter}\\p{Number}\\p{Mark}\\u2060]{1,127})"
+                  ).test(w)
+                ) {
+                  return [w, true];
+                } else {
+                  return [w, false];
+                }
+              })
+              .map((wt, id) =>
+                wt[1] ? (
+                  <div
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (currentChuncksId != "none") {
+                        if (idsWord.includes(id)) {
+                          if (!currentWords.includes(id)) {
+                            setCurrentWords((prev) => {
+                              let prev2 = [...prev];
+                              prev2.push(id);
+                              return prev2;
+                            });
+                            setIdsWord((prev) => {
+                              let prevIdsWord = [...prev];
+                              prevIdsWord.splice(prevIdsWord.indexOf(id), 1);
+                              return prevIdsWord;
+                            });
+                          } else {
+                          }
                         } else {
-                        }
-                      } else {
-                        if (currentWords.includes(id)) {
-                          setIdsWord((prev) => {
-                            let prev2 = [...prev];
-                            prev2.push(id);
-                            return prev2;
-                          });
-                          setCurrentWords((prev) => {
-                            let prevIdsWord = [...prev];
-                            prevIdsWord.splice(prevIdsWord.indexOf(id), 1);
-                            return prevIdsWord;
-                          });
-                        }
-                      }
-                    }
-                  }}
-                  onMouseDown={(e) => {
-                    e.stopPropagation();
-                    if (currentChuncksId != "none") {
-                      setElemSelected([id, [...currentWords]]);
-                    }
-                  }}
-                  onMouseUp={(e) => {
-                    e.stopPropagation();
-                    if (currentChuncksId != "none") {
-                      setElemSelected("none");
-                    }
-                  }}
-                  onMouseOver={(e) => {
-                    e.stopPropagation();
-                    if (currentChuncksId != "none") {
-                      if (elemSelected != "none") {
-                        let p = [...currentWords];
-                        let t = [...idsWord];
-                        for (let wid = 0; wid < currentWords.length; wid++) {
-                          if (
-                            elemSelected[1].indexOf(currentWords[wid]) < 0 &&
-                            (currentWords[wid] < elemSelected[0] ||
-                              currentWords[wid] > id)
-                          ) {
-                            t.push(currentWords[wid]);
-
-                            p.splice(p.indexOf(currentWords[wid]), 1);
+                          if (currentWords.includes(id)) {
+                            setIdsWord((prev) => {
+                              let prev2 = [...prev];
+                              prev2.push(id);
+                              return prev2;
+                            });
+                            setCurrentWords((prev) => {
+                              let prevIdsWord = [...prev];
+                              prevIdsWord.splice(prevIdsWord.indexOf(id), 1);
+                              return prevIdsWord;
+                            });
                           }
                         }
-                        setIdsWord(t);
-                        setCurrentWords(p);
+                      }
+                    }}
+                    onMouseDown={(e) => {
+                      e.stopPropagation();
+                      if (currentChuncksId != "none") {
+                        setElemSelected([id, [...currentWords]]);
+                      }
+                    }}
+                    onMouseUp={(e) => {
+                      e.stopPropagation();
+                      if (currentChuncksId != "none") {
+                        setElemSelected("none");
+                      }
+                    }}
+                    onMouseOver={(e) => {
+                      e.stopPropagation();
+                      if (currentChuncksId != "none") {
+                        if (elemSelected != "none") {
+                          let p = [...currentWords];
+                          let t = [...idsWord];
+                          for (let wid = 0; wid < currentWords.length; wid++) {
+                            if (
+                              elemSelected[1].indexOf(currentWords[wid]) < 0 &&
+                              (currentWords[wid] < elemSelected[0] ||
+                                currentWords[wid] > id)
+                            ) {
+                              t.push(currentWords[wid]);
 
-                        for (let i = elemSelected[0]; i <= id; i++) {
-                          if (idsWord.includes(i)) {
-                            if (!currentWords.includes(i)) {
-                              setCurrentWords((prev) => {
-                                let prev2 = [...prev];
-                                prev2.push(i);
-                                return prev2;
-                              });
-                              setIdsWord((prev) => {
-                                let prevIdsWord = [...prev];
-                                prevIdsWord.splice(prevIdsWord.indexOf(i), 1);
-                                return prevIdsWord;
-                              });
-                            } else {
+                              p.splice(p.indexOf(currentWords[wid]), 1);
+                            }
+                          }
+                          setIdsWord(t);
+                          setCurrentWords(p);
+
+                          for (let i = elemSelected[0]; i <= id; i++) {
+                            if (idsWord.includes(i)) {
+                              if (!currentWords.includes(i)) {
+                                setCurrentWords((prev) => {
+                                  let prev2 = [...prev];
+                                  prev2.push(i);
+                                  return prev2;
+                                });
+                                setIdsWord((prev) => {
+                                  let prevIdsWord = [...prev];
+                                  prevIdsWord.splice(prevIdsWord.indexOf(i), 1);
+                                  return prevIdsWord;
+                                });
+                              } else {
+                              }
                             }
                           }
                         }
                       }
+                    }}
+                    // onMouseOver={() => {
+                    //   console.log(ctrlPressed)
+                    //   if (ctrlPressed) {
+                    //
+                    className="Word"
+                    id="Word"
+                    style={{ fontSize: zoomRigth }}
+                    data-selected={currentWords.includes(id)}
+                    data-ctrl={ctrlPressed}
+                    data-notSelectedBuHover={hoverNotSelectedWord.includes(id)}
+                    data-notCLicable={
+                      !currentWords.includes(id) && !idsWord.includes(id)
                     }
-                  }}
-                  // onMouseOver={() => {
-                  //   console.log(ctrlPressed)
-                  //   if (ctrlPressed) {
-                  //
-                  className="Word"
-                  id="Word"
-                  style={{ fontSize: zoomRigth }}
-                  data-selected={currentWords.includes(id)}
-                  data-ctrl={ctrlPressed}
-                  data-notSelectedBuHover={hoverNotSelectedWord.includes(id)}
-                  data-notCLicable={
-                    !currentWords.includes(id) && !idsWord.includes(id)
-                  }
-                >
-                  {w}
-                </div>
-              ))}
+                  >
+                    {wt[0]}
+                  </div>
+                ) : (
+                  <div className="notUsedWord" style={{ fontSize: zoomRigth }}>
+                    {wt[0]}
+                  </div>
+                )
+              )}
           </div>
         </div>
       </div>
-        <div style={{ position: "fixed", bottom: 60, right: 60 }}>
-          <div data-isClosed={open} className="imageWrapper">
-            <div className="image" data-isClosed={open}>
-              <div
+      <div style={{ position: "fixed", bottom: 60, right: 60 }}>
+        <div data-isClosed={open} className="imageWrapper">
+          <div className="image" data-isClosed={open}>
+            <div
+              style={{
+                flexDirection: "column",
+                justifyContent: "flex-end",
+                display: "flex",
+                background: "#ebebeb",
+                borderRadius: 10,
+              }}
+            >
+              <img
                 style={{
-                  flexDirection: "column",
-                  justifyContent: "flex-end",
-                  display: "flex",
-                  background: "#ebebeb",
-                  borderRadius: 10,
+                  alignSelf: "flex-end",
+                  marginTop: 16,
+                  marginRight: 16,
                 }}
-              >
-                <img
-                  style={{
-                    alignSelf: "flex-end",
-                    marginTop: 16,
-                    marginRight: 16,
-                  }}
-                  onClick={() => {
-                    console.log("nothing!");
-                    setOpen(false);
-                  }}
-                  src={close}
-                  width="24"
-                  height="24"
-                  alt="logo"
-                />
-                <img src={help} width={1290} height={450} />
-              </div>
+                onClick={() => {
+                  console.log("nothing!");
+                  setOpen(false);
+                }}
+                src={close}
+                width="24"
+                height="24"
+                alt="logo"
+              />
+              <img src={help} width={1290} height={450} />
             </div>
-            <img
-              onClick={() => setOpen((prev) => !prev)}
-              src={logo}
-              width="40"
-              height="40"
-              style={{ position: "fixed", bottom: 35, right: 35 }}
-            />
           </div>
+          <img
+            onClick={() => setOpen((prev) => !prev)}
+            src={logo}
+            width="40"
+            height="40"
+            style={{ position: "fixed", bottom: 35, right: 35 }}
+          />
         </div>
       </div>
+    </div>
   );
 }
 

@@ -108,6 +108,12 @@
   font-family: "CharisSIL";
 
 }
+.notUsedWord{
+  font-family: "CharisSIL";
+  padding-top: 5px; /* Added 'px' unit */
+  padding-right: 5px;
+
+}
 .Word::selection{
   background: rgba(255, 255, 0, 0);
 }
