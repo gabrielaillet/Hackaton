@@ -14,6 +14,7 @@
 :root{
   --primary: rgba(255, 127, 92, 0.8);
   --pimaryFade: rgba(255, 127, 92, 0.44);
+  --hover:#e2f2ff;
 }
 
 .App-logo {
@@ -73,13 +74,36 @@
 
 }
 
+.wrapperButtonAlign{
+  border-radius: 16px;
+  border: 2px solid #000;
+  background: #F5F5F5;
+  width: fit-content;
+}
+.wrapperButtonAlign:hover{
+  background: var(--hover);
+}
+.layoutButtonAlign{
+  display: inline-flex;
+  padding: 6px 12px;
+  align-items: center;
+  gap: 7px;
+}
+.staticText{
+  font-family: "CharisSIL";
+  font-size: 2em; 
+  font-weight: 500;
+
+} 
+
 
 .sentences[data-isSelected = "true"]{
   border-radius: 4px;
   width: "fit-content";
-
-
+  z-index: 1;
 }
+
+
 .sentencesWrapper[data-hasBeenDone = "true"]{
   background-color: #b9f3bd;
 }
@@ -89,6 +113,10 @@
 .sentencesWrapper[data-isSelected = "false"]:hover{
   background-color: #e2f2ff
 }
+.sentencesWrapper[data-isCurrentSentenceAlignAndChunck = "true"][data-hasBeenDone = "false"]{
+  background-color: #FFCD1B;
+
+}
 .sentencesWrapper{
   padding-left: 16px;
   padding-right: 16px;
@@ -97,14 +125,13 @@
   border-radius:4px;
   width: fit-content;
   z-index: 1;
-
   
 }
 
 .Word {
   border-radius: 4px;
   padding: 5px; /* Added 'px' unit */
-  margin: 1px; /* Added 'px' unit */
+  margin: 0px; /* Added 'px' unit */
   font-family: "CharisSIL";
 
 }
@@ -113,6 +140,9 @@
   padding-top: 5px; /* Added 'px' unit */
   padding-right: 5px;
 
+}
+.notUsedWord::selection{
+  background: rgba(255, 255, 0, 0);
 }
 .Word::selection{
   background: rgba(255, 255, 0, 0);

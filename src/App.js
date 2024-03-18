@@ -7,12 +7,20 @@ import logo from "./assets/circle-info-solid.svg";
 import close from "./assets/x-solid.svg";
 import { lexingRegexes } from "proskomma-core";
 import XRegExp from "xregexp";
+import { ModalSureEverythingAlign } from "./modalSureEverythingAlign";
+import { AlignedButton } from "./AlignedButton";
 const plse = require("./assets/TIT_align_juxta_psle.json");
 const jxt = require("./assets/Titus_ChatGPT_English_JUXTA.json");
 
 function App() {
   const mainRegex = XRegExp.union(lexingRegexes.map((x) => x[2]));
-  console.log(plse);
+  //Need to pute this in a context
+  const [optionDontShowAlignModal, setOptionDontShowAlignModal] =
+    useState(false);
+  //
+  const [isAlignModalOpen, setIsAlignModalOpen] = useState(false);
+  const [isCurrentSentenceAlign, setIsCurrentSentenceAlign] = useState(false);
+
   const [open, setOpen] = useState(true);
   const [zoomLeft, setZoomLeft] = useState(24);
   const [zoomRigth, setZoomRigth] = useState(24);
@@ -32,7 +40,13 @@ function App() {
   const [idsWord, setIdsWord] = useState([]);
 
   const [hoverNotSelectedWord, setHoverNotSelectedWord] = useState([]);
+  console.log()
   const modifyPLSE = () => {
+    if( plse.blocksAlign){
+      plse.blocksAlign[currentBlockid] = isCurrentSentenceAlign
+
+    }
+
     if (plse.blocks[currentBlockid].alignments.length > 0) {
       for (let i = 0; i < plse.blocks[currentBlockid].alignments.length; i++) {
         if (
@@ -52,6 +66,12 @@ function App() {
         words: currentWords,
         md5Chunck: currentChuncksId,
       });
+      if(currentWords.length > 0){
+        plse.blocks[currentBlockid].chunckAlign[currentChuncksId] = true
+      }
+      if(currentWords.length < 1){
+        plse.blocks[currentBlockid].chunckAlign[currentChuncksId] = false
+      }
     } else {
       plse.blocks[currentBlockid].alignments.push({
         sentences: currentSetenceId,
@@ -59,8 +79,11 @@ function App() {
         md5Chunck: currentChuncksId,
       });
     }
-  };
+    if(currentWords.length > 0){
+      plse.blocks[currentBlockid].chunckAlign[currentChuncksId] = true
+    }
 
+  };
   useEffect(() => {
     if (currentChuncksId != "") {
       for (let i = 0; i < plse.blocks[currentBlockid].alignments.length; i++) {
@@ -75,12 +98,16 @@ function App() {
     }
     setCurrentWords([]);
   }, [currentChuncksId]);
-
+  useEffect(() => {
+    modifyPLSE()
+  },[isCurrentSentenceAlign])
   useEffect(() => {
     let tabl = [];
     for (
       let i = 0;
-      i <= plse.blocks[currentBlockid].tradText.split(" ").length;
+      i <=
+      XRegExp.match(plse.blocks[currentBlockid].tradText, mainRegex, "all")
+        .length;
       i++
     ) {
       tabl.push(i);
@@ -90,6 +117,29 @@ function App() {
         tabl.splice(tabl.indexOf(w), 1);
       });
     }
+      
+
+    if(!plse.blocks[currentBlockid].chunckAlign){
+      let chunckAlign = {}
+      for (let i = 0; i < plse.blocks[currentBlockid].sentences.length;i++){
+        jxt.sentences[plse.blocks[currentBlockid].sentences[i]].chunks.map(c => chunckAlign[c.checksum] = false)
+      }
+      plse.blocks[currentBlockid].chunckAlign = chunckAlign
+
+    }
+
+    if(!plse.blocksAlign){
+      let blocksAlign = []
+      for (let i = 0; i < plse.blocks.length; i++){
+        blocksAlign.push(false)
+      }
+      plse.blocksAlign = blocksAlign
+    }else{
+       setIsCurrentSentenceAlign(plse.blocksAlign[currentBlockid]) 
+    }
+
+
+
     setIdsWord(tabl);
     setBlockSentenceId(plse.blocks[currentBlockid].sentences);
     setCurrentChuncksId(
@@ -100,21 +150,17 @@ function App() {
   const myFunctionPlusTrue = () => {
     if (left) {
       setZoomLeft((prev) => prev + 2);
-      console.log(zoomLeft);
     }
     if (!left) {
       setZoomRigth((prev) => prev + 2);
-      console.log(zoomLeft);
     }
   };
   const myFunctionMinusFalse = () => {
     if (left) {
       setZoomLeft((prev) => prev - 2);
-      console.log(zoomLeft);
     }
     if (!left) {
       setZoomRigth((prev) => prev - 2);
-      console.log(zoomLeft);
     }
   };
   const myFunctionControlFalse = () => {
@@ -198,73 +244,97 @@ function App() {
           zIndex: 0,
         }}
       >
-        <div
-          className="diva"
-          onMouseOver={() => {
-            setLeft(true);
-          }}
-          onClick={() => {
-            modifyPLSE();
-            setCurrentChuncksId("none");
-          }}
-          style={{ overflowY: "scroll", flex: 1, resize: "horizontal" }}
-        >
-          {blocksSentenceId.map((ids) =>
-            jxt.sentences[ids].chunks.map((c) => (
-              <div
-                className="sentencesWrapper"
-                onMouseEnter={() => {
-                  if (c.checksum != currentChuncksId) {
-                    for (
-                      let i = 0;
-                      i < plse.blocks[currentBlockid].alignments.length;
-                      i++
-                    ) {
-                      if (
-                        c.checksum ===
-                        plse.blocks[currentBlockid].alignments[i].md5Chunck
-                      ) {
-                        console.log(
-                          plse.blocks[currentBlockid].alignments[i].words
-                        );
+        <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+          <div
+            className="diva"
+            onMouseOver={() => {
+              setLeft(true);
+            }}
+            onClick={() => {
+              modifyPLSE();
+              setCurrentChuncksId("none");
+            }}
+            style={{ overflowY: "scroll", width: "100%", resize: "horizontal" }}
+          >
+            <div
+              style={
+                isCurrentSentenceAlign
+                  ? { padding: 24, background: "#b9f3bd" }
+                  : { padding: 24 }
+              }
+            >
+              {blocksSentenceId.map((ids) =>
+                jxt.sentences[ids].chunks.map((c) => (
+                  <div
+                    className="sentencesWrapper"
+                    data-isCurrentSentenceAlignAndChunck={isCurrentSentenceAlign}
+                    onMouseEnter={() => {
+                      if (c.checksum != currentChuncksId) {
+                        for (
+                          let i = 0;
+                          i < plse.blocks[currentBlockid].alignments.length;
+                          i++
+                        ) {
+                          if (
+                            c.checksum ===
+                            plse.blocks[currentBlockid].alignments[i].md5Chunck
+                          ) {
+                            
 
-                        setHoverNotSelectedWord(
-                          plse.blocks[currentBlockid].alignments[i].words
-                        );
+                            setHoverNotSelectedWord(
+                              plse.blocks[currentBlockid].alignments[i].words
+                            );
+                          }
+                        }
                       }
-                    }
+                    }}
+                    onMouseLeave={() => {
+                      setHoverNotSelectedWord([]);
+                    }}
+                    data-hasBeenDone={plse.blocks[currentBlockid]?.chunckAlign?plse.blocks[currentBlockid]?.chunckAlign[c.checksum]:false}
+                    data-isSelected={currentChuncksId === c.checksum}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      modifyPLSE();
+                      setcurrentSentenceId(ids);
+                      setCurrentChuncksId(c.checksum);
+                    }}
+                  >
+                    <div
+                      fontSize={zoomLeft}
+                      id={c.checksum}
+                      data-isSelected={currentChuncksId === c.checksum}
+                      className="sentences"
+                      style={{ fontSize: zoomLeft }}
+                    >
+                      {c.gloss}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+          <div
+            style={
+              !isCurrentSentenceAlign
+                ? { justifyContent: "center", display: "flex" }
+                : {
+                    background: "#b9f3bd",
+                    justifyContent: "center",
+                    display: "flex",
                   }
-                }}
-                onMouseLeave={() => {
-                  setHoverNotSelectedWord([]);
-                }}
-                data-hasBeenDone={JSON.stringify(
-                  plse.blocks[currentBlockid].alignments
-                    .map(
-                      (a) => a.md5Chunck === c.checksum && a.words.length > 0
-                    )
-                    .indexOf(true) >= 0
-                )}
-                data-isSelected={currentChuncksId === c.checksum}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  modifyPLSE();
-                  setcurrentSentenceId(ids);
-                  setCurrentChuncksId(c.checksum);
-                }}
-              >
-                <div
-                  fontSize={zoomLeft}
-                  id={c.checksum}
-                  data-isSelected={currentChuncksId === c.checksum}
-                  className="sentences"
-                  style={{ fontSize: zoomLeft }}
-                >
-                  {c.gloss}
-                </div>
-              </div>
-            ))
-          )}
+            }
+          >
+            <AlignedButton
+              isCurrentSentenceAlign={isCurrentSentenceAlign}
+              onClick={() => {
+                setIsCurrentSentenceAlign(!isCurrentSentenceAlign);
+                if (!optionDontShowAlignModal) {
+                  setIsAlignModalOpen(true);
+                }
+              }}
+            />
+          </div>
         </div>
         <div
           className="divb"
@@ -382,10 +452,7 @@ function App() {
                         }
                       }
                     }}
-                    // onMouseOver={() => {
-                    //   console.log(ctrlPressed)
-                    //   if (ctrlPressed) {
-                    //
+                   
                     className="Word"
                     id="Word"
                     style={{ fontSize: zoomRigth }}
@@ -426,7 +493,6 @@ function App() {
                   marginRight: 16,
                 }}
                 onClick={() => {
-                  console.log("nothing!");
                   setOpen(false);
                 }}
                 src={close}
@@ -446,6 +512,13 @@ function App() {
           />
         </div>
       </div>
+      <ModalSureEverythingAlign
+        setOptionDontShowAlignModal={setOptionDontShowAlignModal}
+        optionDontShowAlignModal={optionDontShowAlignModal}
+        isAlignModalOpen={isAlignModalOpen }
+        setIsAlignModalOpen={setIsAlignModalOpen}
+        shouldOpen={plse.blocks[currentBlockid].chunckAlign}
+      />
     </div>
   );
 }
